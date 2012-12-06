@@ -1,0 +1,30 @@
+What is pagination?
+---------------------
+This module helps dividing large lists of items into pages. The user is shown one page at a time and
+can navigate to other pages. Imagine you are offering a company phonebook and let the user search
+the entries. If the search result contains 23 entries but you may want to display no more than 10
+entries at once. The first page contains entries 1-10, the second 11-20 and the third 21-23. See the
+documentation of the "Page" class for more information. 
+
+What does this module do?
+---------------------------
+The *paginate* module supports list-like objects only. If you want to paginate through SQLAlchemy
+objects like Select or ORM-mapped objects then use this module. It provides an SqlalchemyOrmPage
+class for that purpose.
+
+How do I use this module with ORM-mapped objects?
+---------------------------------------------------
+See the documentation for *paginate.Page* about how to use pagination. Instead of *paginate.Page*
+you just use *paginate_sqlalchemy.SqlalchemyOrmPage *with the same parameters as *paginate.Page*.
+Assumed that have an ORM class called *Cars*. You would create a query in your SQLAlchemy session::
+
+    cars_query = session.query(Cars)
+
+Finally you create a page from this query::
+
+    page = paginate_sqlalchemy.SqlalchemyOrmPage(cars_query, page=5)
+
+This *page* object works just like any *paginate.Page* object.
+
+You can find a complete example in the tests/test_paginate_sqlalchemy.py file of this Python module.
+
