@@ -12,10 +12,6 @@ import sqlalchemy
 class SqlalchemyOrmWrapper(object):
     """Wrapper class to access elements of an SQLAlchemy ORM query result."""
     def __init__(self, obj):
-        if type(obj) is not sqlalchemy.orm.query.Query:
-            raise TypeError("Only sqlalchemy.orm.query.Query type objects are supported. " 
-                "Yours is of type {0}".format(type(obj)))
-
         self.obj = obj
 
     def __getitem__(self, range):
