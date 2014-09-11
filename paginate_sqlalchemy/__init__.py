@@ -39,22 +39,20 @@ class SqlalchemyOrmPage(paginate.Page):
 class SqlalchemySelectWrapper(object):
     """Wrapper class to access elements of an SQLAlchemy SELECT query."""
     def __init__(self, obj):
-        if type(obj) is not sqlalchemy.sql.expression.select:
-            raise TypeError("Only sqlalchemy.sql.expression.select type objects are supported. "
-                "Yours is of type {0}".format(type(obj)))
-
         self.obj = obj
 
     def __getitem__(self, range):
         if not isinstance(range, slice):
             raise Exception("__getitem__ without slicing not supported")
-        offset = range.start
+        # value for offset
+        offset_v = range.start
         limit = range.stop - range.start
-        select = self.obj.offset(offset).limit(limit)
+        result = self.obj.sqlalchemy_session.execute(selection).fetchall()
+        select = result.offset(offset_v).limit(limit)
         return self.sqlalchemy_session.execute(select).fetchall()
 
     def __len__(self):
-        return self.obj.count()
+        return self.obj.scalar()
 
 class SqlalchemySelectPage(paginate.Page):
     """A pagination page that deals with SQLAlchemy Select objects.
@@ -65,8 +63,8 @@ class SqlalchemySelectPage(paginate.Page):
     # This class just subclasses paginate.Page which contains all the functionality.
     # It just instantiates the class with a "wrapper_class" argument telling it how the
     # collection can be accessed.
-    def __init__(self, sqlalchemy_connection, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         """sqlalchemy_connection: SQLAlchemy connection object"""
         super(SqlalchemySelectPage, self).__init__(*args, wrapper_class=SqlalchemySelectWrapper, 
-            wrapper_args=dict(sqlalchemy_connection=sqlalchemy_connection), **kwargs)
+            **kwargs)
 

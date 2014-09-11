@@ -4,7 +4,7 @@ import sys, os
 
 setup(
     name='paginate_sqlalchemy',
-    version='0.1.0',
+    version='0.2.0',
     description="Extension to paginate.Page that supports SQLAlchemy queries",
     long_description="""
         This module helps divide up large result sets into pages or chunks.
@@ -27,11 +27,13 @@ setup(
     keywords='pagination paginate sqlalchemy',
     author='Christoph Haas',
     author_email='email@christoph-haas.de',
+    maintainer='Luke Crooks',
+    maintainer_email='luke@pumalo.org',
     install_requires=[
-        "sqlalchemy>=0.4",
+        "sqlalchemy>=0.8.3",
         "paginate>=0.4"
         ],
-    url='https://github.com/Signum/paginate_sqlalchemy',
+    url='https://github.com/crooksey/paginate_sqlalchemy',
     license='MIT',
     packages=find_packages(),
     include_package_data=True,
