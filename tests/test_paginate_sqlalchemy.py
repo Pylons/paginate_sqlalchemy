@@ -3,63 +3,60 @@
 
 """Enhances the paginate.Page class to work with SQLAlchemy objects"""
 
-import sys
-from nose.tools import eq_, raises
-import unittest
-import sqlalchemy
+import pytest
+import sqlalchemy as sa
 import sqlalchemy.orm
 import paginate_sqlalchemy
 
-class TestSqlalchemyPage(unittest.TestCase):
-    def setUp(self):
-        engine = sqlalchemy.create_engine('sqlite:///:memory:', echo=False)
-        from sqlalchemy.ext.declarative import declarative_base
-        Base = declarative_base()
-        from sqlalchemy import Column, Integer, String
-        
-        class User(Base):
-            __tablename__ = 'users'
-            id = Column(Integer, primary_key=True)
-            name = Column(String)
-            
-        Base.metadata.create_all(engine)
-        
-        Session = sqlalchemy.orm.sessionmaker(bind=engine)
-        session = Session()
-        
-        for i in range(1000):
-            user = User()
-            user.name = i
-            session.add(user)
-            
-        session.commit()
+from sqlalchemy.ext.declarative import declarative_base
 
-        self.engine = engine
-        self.session = session
-        self.User = User
+Base = declarative_base()
 
-        # Prepare SELECT object
-        self.connection=self.engine.connect()
-        metadata=sqlalchemy.MetaData()
-        self.users_table=sqlalchemy.Table('users',metadata,sqlalchemy.Column('id',sqlalchemy.Integer),
-                sqlalchemy.Column('name',sqlalchemy.String))
 
-    def test_orm(self):
-        orm_query = self.session.query(self.User)
-        page = paginate_sqlalchemy.SqlalchemyOrmPage(orm_query, page=8)
-        eq_(orm_query.count(), 1000)
-        eq_(page.first_item, 141)
-        eq_(page.last_item, 160)
-        eq_(page.page_count, 50)
+class User(Base):
+    __tablename__ = 'users'
+    id = sa.Column(sa.Integer, primary_key=True)
+    name = sa.Column(sa.String)
 
-    ''' need to write a working test, following fails with
-    AttributeError: 'ResultProxy' object has no attribute 'sqlalchemy_session'
-    def test_select(self):
-        # sqlalchemy.engine.base.ResultProxy
-        selection = self.connection.execute(sqlalchemy.sql.select([self.users_table]))
-        page = paginate_sqlalchemy.SqlalchemySelectPage(selection, page=8)
-        eq_(orm_query.count(), 1000)
-        eq_(page.first_item, 141)
-        eq_(page.last_item, 160)
-        eq_(page.page_count, 50)
-    '''
+
+@pytest.fixture(scope='function')
+def db_engine():
+    engine = sa.create_engine('sqlite:///:memory:', echo=True)
+    Base.metadata.create_all(engine)
+    return engine
+
+
+@pytest.fixture(scope='function')
+def db_session(db_engine):
+    return sqlalchemy.orm.sessionmaker(bind=db_engine)()
+
+
+@pytest.fixture(scope='function')
+def base_data(db_session):
+    users = []
+    for i in range(1000):
+        users.append({'id': i, 'name': 'user_{}'.format(i)})
+    db_session.execute(User.__table__.insert(), users)
+    db_session.commit()
+
+
+@pytest.mark.usefixtures("base_data")
+class TestSqlalchemyPage(object):
+    def test_orm(self, db_session):
+        orm_query = db_session.query(User)
+        page = paginate_sqlalchemy.SqlalchemyOrmPage(
+            orm_query, page=8, db_session=db_session)
+        assert page.item_count == 1000
+        assert page.first_item == 141
+        assert page.last_item == 160
+        assert page.page_count == 50
+
+    def test_select(self, db_session):
+        users_table = User.__table__
+        select_query = sqlalchemy.sql.select([users_table])
+        page = paginate_sqlalchemy.SqlalchemySelectPage(
+            db_session, select_query, page=8)
+        assert page.item_count == 1000
+        assert page.first_item == 141
+        assert page.last_item == 160
+        assert page.page_count == 50
