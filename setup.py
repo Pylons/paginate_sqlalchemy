@@ -4,7 +4,7 @@ import sys, os
 
 setup(
     name='paginate_sqlalchemy',
-    version='0.2.0',
+    version='0.3.0',
     description="Extension to paginate.Page that supports SQLAlchemy queries",
     long_description="""
         This module helps divide up large result sets into pages or chunks.
