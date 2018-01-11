@@ -1,6 +1,6 @@
 dist/
 *.pyc
 *.komodoproject
-paginate.egg-info/
+*.egg-info/
 build/
 virtualenv/
