@@ -12,13 +12,15 @@ setup(
         It is especially useful when developing web interfaces and showing the
         users only a selection of information at a time.
 
-        This module uses and extends the functionality of the paginate module to 
+        This module uses and extends the functionality of the paginate module to
         support SQLAlchemy queries.
         """,
 
     # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
         'Programming Language :: Python',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 3',
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
