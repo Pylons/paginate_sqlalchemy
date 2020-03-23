@@ -53,7 +53,7 @@ def sql_wrapper_factory(db_session=None):
             return self.db_session.execute(select).fetchall()
 
         def __len__(self):
-            return self.db_session.execute(self.obj.count()).scalar()
+            return self.db_session.execute(self.obj.alias().count()).scalar()
 
     return SqlalchemySelectWrapper
 
